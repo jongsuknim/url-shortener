@@ -1,0 +1,21 @@
+@(urls: Iterator[(String, services.URLData)], hostAddress: String)(implicit flash: Flash, messages: Messages)
+
+<div class="container">
+<table class="table">
+  <thead>
+    <tr>
+      <th>URL</th>
+      <th>Shorten URL</th>
+    </tr>
+  </thead>
+
+  <tbody>
+  @for((shorten, urlData) <- urls) {
+  <tr>
+    <td> @urlData.url </td>
+    <td> @{hostAddress + "/" + shorten } </td>
+  </tr>
+  }
+  </tbody>
+</table>
+</div>

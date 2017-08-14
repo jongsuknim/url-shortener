@@ -1,0 +1,26 @@
+@(title: String)(content: Html)(implicit flash: Flash, messages: Messages)
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>@title</title>
+    <link rel="stylesheet" type="text/css" media="screen" href='@routes.Assets.versioned("lib/bootstrap/css/bootstrap.css")'>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+  </head>
+  <body>
+  
+    <div class="container">
+      @if(flash.get("success").isDefined){
+        <div class="alert alert-success">
+        @flash.get("success")
+        </div> }
+      @if(flash.get("error").isDefined){
+        <div class="alert alert-danger">
+        @flash.get("error")
+        </div>
+      }
+      @content
+    </div>
+  
+  </body>
+</html>

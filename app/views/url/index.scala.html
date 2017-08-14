@@ -1,0 +1,6 @@
+@(urlForm: Form[services.URLData], urls: Iterator[(String, services.URLData)], hostAddress: String)(implicit flash: Flash, messages: Messages)
+
+@main("Welcome to Play") {
+	@url.form(urlForm)
+	@url.list(urls, hostAddress)
+}
