@@ -51,7 +51,7 @@ class MapURLShortener extends URLShortener {
 	}
 
 	def makeShorten(url: URL, seq: Int = 0): String = {
-		hash(url.toString + hash(seq.toString))
+		hash(url.toString + ";" + seq.toString)
 	}
 }
 

@@ -33,7 +33,7 @@ class URLShortenerSpec extends PlaySpec {
     "return different shorten url when request url's pathes are different" in {
       val mapURLShortener = new MapURLShortener()
 
-      val urlFunc = path => s"https://en.wikipedia.org/${path}"
+      val urlFunc = path => s"https://en.wikipedia.org/$path"
       val pathString = "wiki/URL_shortening"
       mapURLShortener.addUrl(new URL(urlFunc(pathString))) must not be(
         mapURLShortener.addUrl(new URL(urlFunc(pathString+"12"))))
@@ -44,8 +44,24 @@ class URLShortenerSpec extends PlaySpec {
       mapURLShortener.getAll().length must be(3)
     }
 
+
     "work correctly in concurrent environment" in {
-      
+      import scala.concurrent._
+      import ExecutionContext.Implicits.global
+      import scala.concurrent.duration._
+
+      val mapURLShortener = new MapURLShortener()
+
+      val urlFunc = path => s"https://en.wikipedia.org/$path"
+      val urlCount = 10000
+      val urls = for(i <- 0 until urlCount) yield urlFunc(i.toString)
+
+      val futures = for(i <- 0 until 4) yield Future {
+        val shuffledUrls = scala.util.Random.shuffle(urls)
+        shuffledUrls.map(url => mapURLShortener.addUrl(new URL(url)))
+      }
+      for(f <- futures) Await.ready(f, Duration.Inf)
+      mapURLShortener.getAll().length must be(urlCount)
     }
   }
 }
