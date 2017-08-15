@@ -38,10 +38,9 @@ class URLController @Inject() (urlShortener: URLShortener, val messagesApi: Mess
       success = { urlString =>
         try {
           val url = new URL(urlString)
-          val lowercaseURL = new URL(url.getProtocol, url.getHost.toLowerCase, url.getPort, url.getFile)
-          val shorten = urlShortener.addUrl(lowercaseURL)
+          val shorten = urlShortener.addUrl(url)
           Redirect(routes.URLController.index()).flashing(
-            "success" -> s"등록 성공: ${lowercaseURL.toString} => ${request.host}/$shorten")
+            "success" -> s"등록 성공: ${url.toString} => ${request.host}/$shorten")
         } catch {
           case e : Throwable =>        
             Redirect(routes.URLController.index()).flashing(

@@ -19,11 +19,13 @@ class MapURLShortener extends URLShortener {
 	val urls: concurrent.Map[String, URL] = new ConcurrentHashMap().asScala
 
 	def addUrlInternal(url: URL, seq: Int): String = {
-		val shorten = makeShorten(url, seq)				
+		val lowercaseURL = new URL(url.getProtocol, url.getHost.toLowerCase, url.getPort, url.getFile)
+          
+		val shorten = makeShorten(lowercaseURL, seq)				
 		urls.get(shorten) match {
-			case None => urls.put(shorten, url); shorten
-			case Some(value_url) if url == value_url => shorten
-			case _ => addUrlInternal(url, seq+1)
+			case None => urls.put(shorten, lowercaseURL); shorten
+			case Some(value_url) if lowercaseURL == value_url => shorten
+			case _ => addUrlInternal(lowercaseURL, seq+1)
 		}
 	}
 
