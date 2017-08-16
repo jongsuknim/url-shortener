@@ -6,7 +6,7 @@ import java.net.URL
 
 trait URLShortener {
 	def addUrl(urlString: URL): String
-	def getURL(shorten: String): Option[URL]
+	def getUrl(shorten: String): Option[URL]
 	def getAll(): Iterator[(String, URL)]
 }
 
@@ -16,9 +16,23 @@ class MapURLShortener extends URLShortener {
 	import java.util.concurrent.ConcurrentHashMap
 	import scala.collection.JavaConverters._
 
-	val urls: concurrent.Map[String, URL] = new ConcurrentHashMap().asScala
+	def addUrl(url: URL): String = {
+		urls.synchronized {
+			addUrlInternal(url, 0)
+		}
+	}
 
-	def addUrlInternal(url: URL, seq: Int): String = {
+	def getUrl(shorten: String): Option[URL] = {
+		urls.get(shorten)
+	}
+
+	def getAll(): Iterator[(String, URL)] = {
+		urls.iterator
+	}
+
+	private val urls: concurrent.Map[String, URL] = new ConcurrentHashMap().asScala
+
+	private def addUrlInternal(url: URL, seq: Int): String = {
 		val lowercaseURL = new URL(url.getProtocol, url.getHost.toLowerCase, url.getPort, url.getFile)
           
 		val shorten = makeShorten(lowercaseURL, seq)				
@@ -29,28 +43,14 @@ class MapURLShortener extends URLShortener {
 		}
 	}
 
-	def getAll(): Iterator[(String, URL)] = {
-		urls.iterator
-	}
-
-	override def addUrl(url: URL): String = {
-		urls.synchronized {
-			addUrlInternal(url, 0)
-		}
-	}
-
-	override def getURL(shorten: String): Option[URL] = {
-		urls.get(shorten)
-	}
-
-	val md = java.security.MessageDigest.getInstance("SHA-1")
-	def hash(value: String): String = {
+	private val md = java.security.MessageDigest.getInstance("SHA-1")
+	private def hash(value: String): String = {
 		import java.util.Base64
 		Base64.getUrlEncoder().encodeToString(
 			md.digest(value.getBytes)).substring(0,8)
 	}
 
-	def makeShorten(url: URL, seq: Int = 0): String = {
+	private def makeShorten(url: URL, seq: Int = 0): String = {
 		hash(url.toString + ";" + seq.toString)
 	}
 }

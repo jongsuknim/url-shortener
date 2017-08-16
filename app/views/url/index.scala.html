@@ -1,6 +1,6 @@
 @(urlForm: Form[String], urls: Iterator[(String, java.net.URL)], hostAddress: String)(implicit flash: Flash, messages: Messages)
 
-@main("Welcome to Play") {
+@main("URL 줄이기") {
 	@url.form(urlForm)
 	@url.list(urls, hostAddress)
 }

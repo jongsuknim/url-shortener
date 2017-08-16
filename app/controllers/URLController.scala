@@ -24,20 +24,28 @@ class URLController @Inject() (urlShortener: URLShortener, val messagesApi: Mess
 	)
 	
   def index = Action { implicit request =>
-  	Ok(views.html.url.index(urlForm, urlShortener.getAll(), request.host))
+    val form = 
+      if (request2flash.get("formError").isDefined)
+        urlForm.bind(request2flash.data)
+      else
+        urlForm
+        
+    Ok(views.html.url.index(form, urlShortener.getAll(), request.host))
   } 
 
   def create = Action { implicit request =>
     val newUrlForm = urlForm.bindFromRequest()
 
     newUrlForm.fold(
-      hasErrors = { _ =>
+      hasErrors = { form =>
         Redirect(routes.URLController.index()).flashing(
-          ("error" -> s"등록 에러"))
+          Flash(form.data) + 
+          ("formError" -> "등록에러"))
       },
       success = { urlString =>
         try {
           val url = new URL(urlString)
+          url.toURI() // for checking url validation
           val shorten = urlShortener.addUrl(url)
           Redirect(routes.URLController.index()).flashing(
             "success" -> s"등록 성공: ${url.toString} => ${request.host}/$shorten")
@@ -50,7 +58,7 @@ class URLController @Inject() (urlShortener: URLShortener, val messagesApi: Mess
   }
 
   def go(shortenUrl: String) = Action { implicit request =>
-    urlShortener.getURL(shortenUrl) match {
+    urlShortener.getUrl(shortenUrl) match {
       case None => NotFound(s"${request.host}/$shortenUrl 페이지가 존재하지 않습니다.")
       case Some(url) => Redirect(url.toString)
     }
