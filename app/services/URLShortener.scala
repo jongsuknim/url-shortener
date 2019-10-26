@@ -12,7 +12,7 @@ trait URLShortener {
 
 @Singleton
 class MapURLShortener extends URLShortener {
-	import scala.collection._	
+	import scala.collection._
 	import java.util.concurrent.ConcurrentHashMap
 	import scala.collection.JavaConverters._
 
